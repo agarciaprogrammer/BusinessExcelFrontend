@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { UploadResponse } from "../features/upload/uploadService";
 import { useNavigate } from "react-router-dom";
 import ProcesosPorMesChart from "../components/charts/ProcesosPorMesChart";
+import CumplimientoGapChart from "../components/charts/CumplimientoGAPChart";
 import type { Proceso } from "../types/Proceso";
 import { paginate } from "../utils/pagination";
 
@@ -58,7 +59,7 @@ const DashboardPage = () => {
       p.nroProceso.toString().includes(search) ||
       p.descripcion.toLowerCase().includes(search.toLowerCase())
     );
-
+    
   // Luego paginamos
   const paginatedAdj = paginate(searchFiltered(procesosAdjFiltrados), page, itemsPerPage);
   const paginatedSin = paginate(searchFiltered(procesosSinFiltrados), page, itemsPerPage);
@@ -143,6 +144,12 @@ const DashboardPage = () => {
     );
   };
 
+  const calcularCumplimientoGap = (procesos: Proceso[]) => {
+    const cumple = procesos.filter(p => p.cumpleGap).length;
+    const noCumple = procesos.length - cumple;
+    return { "Cumple GAP": cumple, "No cumple GAP": noCumple };
+  };
+
 
   return (
     <div className="min-h-screen bg-gray-50 py-10 px-4">
@@ -152,36 +159,65 @@ const DashboardPage = () => {
           <p className="text-gray-500">Visualización de indicadores de compras</p>
         </header>
 
-        <div className="flex justify-between items-center gap-4">
-          <input
-            type="text"
-            placeholder="Buscar por número o descripción"
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1); // Reiniciar a la primera página al buscar
-            }}
-            className="w-full max-w-md px-4 py-2 border rounded shadow-sm"
-          />
-        </div>
-
-        <section className="bg-white shadow rounded-xl p-6">
+        <section className="bg-white shadow rounded-xl p-10">
           <h2 className="text-2xl font-semibold text-blue-600 mb-4">Procesos Adjudicados</h2>
-          <ProcesosPorMesChart
-            procesosPorMes={data.resumenAdjudicados.procesosPorMes}
-            title="Procesos Adjudicados por Mes"
-          />
+          <section className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+            <div className="bg-white shadow rounded p-5">
+              <ProcesosPorMesChart
+                procesosPorMes={data.resumenAdjudicados.procesosPorMes}
+                title="Procesos Adjudicados por Mes"
+              />
+            </div>
+            <div className="bg-white shadow rounded p-5">
+              <CumplimientoGapChart
+                dataGAP={calcularCumplimientoGap(data.adjudicados)}
+              /> 
+            </div>
+          </section>
+            <div className="flex justify-between items-center gap-4">
+              <input
+                type="text"
+                placeholder="Buscar por número o descripción"
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPage(1); // Reiniciar a la primera página al buscar
+                }}
+                className="w-full max-w-md px-4 py-2 border rounded shadow-sm mb-3"
+              />
+          </div>
           {renderFiltros(mesAdj, setMesAdj, estadoAdj, setEstadoAdj, gapAdj, setGapAdj, data.adjudicados)}
-          {renderTabla(paginatedAdj)}
+          {renderTabla(paginatedAdj)}  
           {renderPagination(searchFiltered(procesosAdjFiltrados).length)}
         </section>
 
-        <section className="bg-white shadow rounded-xl p-6">
+        <section className="bg-white shadow rounded-xl p-10">
           <h2 className="text-2xl font-semibold text-red-600 mb-4">Procesos Sin Adjudicar</h2>
-          <ProcesosPorMesChart
-            procesosPorMes={data.resumenSinAdjudicar.procesosPorMes}
-            title="Procesos Sin Adjudicar por Mes"
-          />
+          <section className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+            <div className="bg-white shadow rounded p-4">
+              <ProcesosPorMesChart
+                procesosPorMes={data.resumenAdjudicados.procesosPorMes}
+                title="Procesos Adjudicados por Mes"
+              />
+            </div>
+            <div className="bg-white shadow rounded p-5">
+              <CumplimientoGapChart
+                dataGAP={calcularCumplimientoGap(data.sinAdjudicar)}
+              /> 
+            </div>
+          </section>
+            <div className="flex justify-between items-center gap-4">
+              <input
+                type="text"
+                placeholder="Buscar por número o descripción"
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPage(1);
+                }}
+                className="w-full max-w-md px-4 py-2 border rounded shadow-sm mb-3"
+              />
+          </div>
           {renderFiltros(mesSin, setMesSin, estadoSin, setEstadoSin, gapSin, setGapSin, data.sinAdjudicar)}
           {renderTabla(paginatedSin)}
           {renderPagination(searchFiltered(procesosSinFiltrados).length)}

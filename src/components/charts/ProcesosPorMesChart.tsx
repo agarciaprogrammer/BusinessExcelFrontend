@@ -25,7 +25,7 @@ const ProcesosPorMesChart: React.FC<Props> = ({ procesosPorMes, title }) => {
       {
         label: "Cantidad de procesos",
         data: labels.map((label) => procesosPorMes[label]),
-        backgroundColor: "rgba(59, 130, 246, 0.7)", // Tailwind blue-500
+        backgroundColor: "rgba(59, 130, 246, 0.7)",
       },
     ],
   };
